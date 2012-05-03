@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>OkayJS Test Suite</title>
+    
+  <!-- Okay -->
+  
+  <script src="../support/underscore-min.js"></script>
+  <script src="../support/zepto.min.js"></script>
+  
+  <script src="../src/ok.core.js"></script>
+  
+  <script src="../src/dom/ok.dom.zepto.js"></script>
+  
+  <script src="../src/bindings/ok.binding.visible.js"></script>
+  <script src="../src/bindings/ok.binding.html.js"></script>
+  <script src="../src/bindings/ok.binding.click.js"></script>
+  <script src="../src/bindings/ok.binding.submit.js"></script>
+  <script src="../src/bindings/ok.binding.value.js"></script>
+  
+  <style>
+    .box {
+      border: solid 1px #ccc;
+      padding: 10px;
+    }
+  </style>
+  
+</head>
+<body>
+  
+  <div class='box'>
+    <p>These should all match each other</p>
+    <input data-bind='value: first' />
+    <input data-bind='value: first' />
+    <p data-bind='html: first'></p>
+    <p data-bind='visible: second'>Such a long string!</p>
+  </div>
+  
+  <div class='box'>
+    <p>When you click on this, it should toggle visibility</p>
+    <a href='#' data-bind='click: third'>Click here</a>
+    <p data-bind='visible: fourth'>Now I'm visible!</p>
+    <p>This form should stop your submit</p>
+    <form data-bind='submit: interrupt'>
+      <input type='submit' value='try it' />
+    </form>
+  </div>
+  
+  <script>
+    console.log("Loading...")
+    var vm = {
+      first: ok.base('test'),
+      fourth: ok.base(false)
+    };
+    
+    vm.second = ok.dependent(function() {
+      return (this.first().length > 5);
+    }, vm);
+    
+    vm.third = function(event) {
+      vm.fourth(!vm.fourth());
+      return false;
+    };
+    
+    vm.interrupt = function(event) {
+      console.log("Interrupted form submit");
+      console.log("VM data: " + this.first());
+    }
+    
+    ok.bind(vm);
+  </script>
+  
+</body>
+</html>

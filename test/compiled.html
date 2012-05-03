@@ -1,0 +1,59 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>OkayJS Test Suite</title>
+  
+  <!-- QUnit (must go at top!) -->
+  
+  <link rel="stylesheet" href="../support/qunit.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="../support/qunit.js"></script>
+  
+  <!-- Okay -->
+  
+  <script src="../support/underscore-min.js"></script>
+  <script src="../support/zepto.min.js"></script>
+  
+  <script src="../build/output/okay-latest.js"></script>
+  
+  <!-- Tests -->
+  
+  <script type="text/javascript" src="bases.js"></script>
+  <script type="text/javascript" src="collections.js"></script>
+  <script type="text/javascript" src="dependents.js"></script>
+  <script type="text/javascript" src="bindings.js"></script>
+  <script type="text/javascript" src="complex.js"></script>
+  
+  <script type="text/javascript" src="bindings/value.js"></script>
+  <script type="text/javascript" src="bindings/repeat.js"></script>
+  
+</head>
+<body>
+  <h1 id="qunit-header">OkayJS Test Suite</h1>
+  <h2 id="qunit-banner"></h2>
+  <h2 id="qunit-userAgent"></h2>
+  <ol id="qunit-tests"></ol>
+  
+  <div id='testDom'>
+    <p id='testHtml' data-bind='html: testHtml'>html</p>
+    <p id='testVisible' data-bind='visible: testVisible'>visible</p>
+    <p id='namespace1' data-bind-namespace1='visible: visible'>namespace 1</p>
+    <p id='namespace2' data-bind-namespace2='visible: visible'>namespace 2</p>
+  </div>
+
+  <div id='testValue'>
+    <input id='valueInput' data-bind-value='value: testValue' />
+  </div>
+  
+  <div id='testRepeat'>
+    <ul data-bind-repeat='repeat: { template: "productTemplate", collection: products }'><li>Test</li><li>test2</li><li>test3</li></ul>
+  </div>
+  
+  <script id='productTemplate' type='text/html'>
+    <li>
+      <h3 data-bind='html: name'>Name</h3>
+      <p>$<span data-bind='html: price'>Price</span></p>
+    </li>
+  </script>
+  
+</body>
+</html>
