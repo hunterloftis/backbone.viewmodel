@@ -1,75 +1,23 @@
 (function(Backbone) {
 
-  // description is an object with: node, viewModel, attribute
-  var TextBinding = function(description) {
-    _.bindAll(this);
-
-    console.log("New 'text' binding:", description);
-    _.extend(this, description);
-
-    this.bind();
-    this.onModelChange();
-  };
-
-  _.extend(TextBinding.prototype, {
-
-    bind: function() {
-      this.viewModel.on('change:' + this.attribute, this.onModelChange);
-    },
-
-    onModelChange: function() {
-      var val = this.viewModel.get(this.attribute);
-      $(this.node).text(val);
-    },
-
-    unbind: function() {
-      this.viewModel.removeListener('change:' + this.attribute, this.update);
-    }
-  });
-
-  var ValBinding = function(description) {
-    _.bindAll(this);
-
-    console.log("New 'val' binding:", description);
-    _.extend(this, description);
-
-    this.bind();
-    this.onModelChange();
-  };
-
-  _.extend(ValBinding.prototype, {
-
-    bind: function() {
-      this.viewModel.on('change:', this.attribute, this.onModelChange);
-      $(this.node).on('keyup change', this.onViewChange);
-    },
-
-    onModelChange: function() {
-      var val = this.viewModel.get(this.attribute);
-      $(this.node).val(val);
-    },
-
-    onViewChange: function() {
-      var val = $(this.node).val();
-      this.viewModel.set(this.attribute, val);
-    },
-
-    unbind: function() {
-
-    }
-  });
-
   Backbone.ViewModel = Backbone.Model.extend({
 
     initialize: function(attributes, options) {
       this._bindings = [];
     },
 
-    bindTo: function(attribute, container) {
+    bindView: function(attribute, container) {
       container = container || 'body';
       var nodes = $(container).find('*[' + attribute + ']');
 
       _.each(nodes, this.bindToNode(attribute));
+    },
+
+    unbindView: function() {
+      _.each(this._bindings, function(binding) {
+        binding.stop();
+      });
+      this._bindings = [];
     },
 
     isBoundTo: function(node) {
@@ -107,10 +55,11 @@
     },
 
     createBinding: function(description) {
-      var Binding = Backbone.ViewModel.bindings[description.type];
+      var Binding = Backbone.Binding[description.type];
       if (Binding) {
         var binding = new Binding(description);
         if (binding) {
+          binding.start();
           this._bindings.push(binding);
           return binding;
         }
@@ -119,11 +68,6 @@
       throw new Error("Trying to create a binding of unknown type '" + description.type + "'");
     }
 
-  }, {
-    bindings: {
-      text: TextBinding,
-      val: ValBinding
-    }
   });
 
 })(Backbone);

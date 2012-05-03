@@ -15,11 +15,13 @@
   <script src='../vendor/backbone-0.9.2.js'></script>
 
   <script src='../backbone.viewmodel.js'></script>
+  <script src='../lib/bindings.js'></script>
+
   <script>
     var simpleVM = new Backbone.ViewModel({
       name: 'Hunter'
     });
-    simpleVM.bindTo('data-simple');
+    simpleVM.bindView('data-simple');
   </script>
 
 </body>

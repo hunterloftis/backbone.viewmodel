@@ -1,15 +1,6 @@
-describe('Attributes', function() {
-  describe('setting and getting', function() {
-    var vm = new Backbone.ViewModel({
-      num: 123,
-      str: 'abc',
-      bool: false
-    });
-    strictEqual(vm.)
-  });
-});
 
-$(document).ready(function() {
+
+function neverRun() {
 
   module("Bases");
 
