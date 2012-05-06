@@ -10,10 +10,12 @@
   function extendCollection(name) {
     Backbone.Collection.prototype['_' + name] = Backbone.Collection.prototype[name];
     Backbone.Collection.prototype[name] = function() {
+      // Trigger an update on any write operation...
       Backbone.Computed.track(this, 'add remove reset change create sort');
       return this['_' + name].apply(this, arguments);
     };
   }
+  // ...if a Computed function performs a Collection read operation:
   _.each(['get', 'getByCid', 'where', 'pluck', 'clone', 'at', 'toJSON'], extendCollection);
 
 

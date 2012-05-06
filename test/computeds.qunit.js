@@ -27,7 +27,7 @@ $(document).ready(function() {
 
     var computations = 0;
 
-    var a = new Backbone.ViewModel({
+    var a = new Backbone.Model({
       base: 1
     });
 
@@ -53,7 +53,7 @@ $(document).ready(function() {
 
     var computations = 0;
 
-    var model = new Backbone.ViewModel({
+    var model = new Backbone.Model({
       players: new Backbone.Collection([
         { name: 'Alice', points: 1 },
         { name: 'Bob', points: 3 },
