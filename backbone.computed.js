@@ -21,7 +21,15 @@
 
   Backbone.Computed = function(attr, fn, context) {
     this.attr = attr;
-    this.fn = fn;
+    if (typeof(fn) === 'function') {
+      this.get = fn;
+      this.safe = false;
+    }
+    else {
+      // extend with: get, safe
+      _.extend(this, fn);
+      this.safe = fn.hasOwnProperty('fail');
+    }
     this.context = context;
     this.dependencies = [];
     this.result = undefined;
@@ -31,7 +39,17 @@
 
     run: function() {
       Backbone.Computed.startTracking();
-      this.result = this.fn.call(this.context);
+      if (this.safe) {
+        try {
+          this.result = this.get.call(this.context);
+        }
+        catch (e) {
+          this.result = this.fail;
+        }
+      }
+      else {
+        this.result = this.get.call(this.context);
+      }
       this.update(Backbone.Computed.stopTracking());
       this.trigger('change', this);
       return this.result;
