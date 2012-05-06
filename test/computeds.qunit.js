@@ -1,6 +1,54 @@
 $(document).ready(function() {
 
-  module("Backbone.Computed");
+  module("Backbone.ViewModel.compute()");
+
+  test("tracking a simple computation within a ViewModel", function() {
+
+    var computations = 0;
+
+    var vm = new Backbone.ViewModel({
+      base: 1
+    });
+
+    vm.compute('triple', function() {
+      computations++;
+      return this.get('base') * 3;
+    });
+
+    strictEqual(vm.get('triple'), 3, 'initial computation should be 3');
+    strictEqual(computations, 1, 'computation should be run once');
+
+    vm.set('base', 2);
+    strictEqual(vm.get('triple'), 6, 'computation should be 6 after base update');
+    strictEqual(computations, 2, 'computation should be run twice');
+  });
+
+  test("tracking a simple computation across ViewModels", function() {
+
+    var computations = 0;
+
+    var a = new Backbone.ViewModel({
+      base: 1
+    });
+
+    var b = new Backbone.ViewModel({
+      model: a
+    });
+
+    b.compute('triple', function() {
+      computations++;
+      return this.get('model').get('base') * 3;
+    });
+
+    strictEqual(b.get('triple'), 3, 'initial computation should be 3');
+    strictEqual(computations, 1, 'computation should be run once');
+
+    a.set('base', 2);
+    strictEqual(b.get('triple'), 6, 'computation should be 6 after base update');
+    strictEqual(computations, 2, 'computation should be run twice');
+  });
+
+return;
 
   test("filtering a model", function() {
 

@@ -5,8 +5,6 @@
     initialize: function(attributes, options) {
       this._bindings = [];
       this._computes = {};
-      this._tracking = false;
-      this._tracked = [];
     },
 
     bindView: function(attribute, container) {
@@ -73,37 +71,19 @@
 
     // Get the value of an attribute.
     get: function(attr) {
-      if (this._tracking) {
-        this._tracked.push(attr);
-      }
+      Backbone.Computed.track(this, attr);
       return this.attributes[attr];
     },
 
     compute: function(attr, fn) {
-      this._computes[attr] = {
-        fn: fn,
-        dependencies: [],
-        listeners: []
-      };
-      this.set(attr, this.runCompute(attr));
+      var newComputed = new Backbone.Computed(attr, fn, this);
+      this._computes[attr] = newComputed;
+      newComputed.on('change', this.onCompute, this);
+      newComputed.run();
     },
 
-    runCompute: function(attr) {
-      var compute = this._computes[attr];
-      result = compute.fn.call(this);
-      return result;
-    },
-
-    startTracking: function() {
-      this._tracking = true;
-      this._tracked = [];
-    },
-
-    stopTracking: function() {
-      this._tracking = false;
-      var deps = this._tracked;
-      this._tracked = [];
-      return deps;
+    onCompute: function(compute) {
+      this.set(compute.attr, compute.result);
     }
 
   });
