@@ -4,6 +4,9 @@
 
     initialize: function(attributes, options) {
       this._bindings = [];
+      this._computes = {};
+      this._tracking = false;
+      this._tracked = [];
     },
 
     bindView: function(attribute, container) {
@@ -66,6 +69,41 @@
         throw new Error("Unable to create '" + description.type + "' binding");
       }
       throw new Error("Trying to create a binding of unknown type '" + description.type + "'");
+    },
+
+    // Get the value of an attribute.
+    get: function(attr) {
+      if (this._tracking) {
+        this._tracked.push(attr);
+      }
+      return this.attributes[attr];
+    },
+
+    compute: function(attr, fn) {
+      this._computes[attr] = {
+        fn: fn,
+        dependencies: [],
+        listeners: []
+      };
+      this.set(attr, this.runCompute(attr));
+    },
+
+    runCompute: function(attr) {
+      var compute = this._computes[attr];
+      result = compute.fn.call(this);
+      return result;
+    },
+
+    startTracking: function() {
+      this._tracking = true;
+      this._tracked = [];
+    },
+
+    stopTracking: function() {
+      this._tracking = false;
+      var deps = this._tracked;
+      this._tracked = [];
+      return deps;
     }
 
   });
