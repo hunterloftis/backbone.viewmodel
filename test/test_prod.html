@@ -1,0 +1,53 @@
+<html>
+<head>
+  <title>Backbone.ViewModel Test Suite</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <!-- Test dependencies -->
+  <link rel="stylesheet" href="../vendor/qunit.css" type="text/css" media="screen">
+  <script src="../vendor/qunit.js"></script>
+  <script src="../vendor/jslitmus.js"></script>
+
+  <!-- Platform dependencies -->
+  <script src='../vendor/zepto-1.0rc1.js'></script>
+  <script src='../vendor/underscore-1.3.3.js'></script>
+  <script src='../vendor/backbone-0.9.2.js'></script>
+
+  <!-- Backbone.ViewModel -->
+  <script src='../dist/backbone.viewmodel-0.1.0.min.js'></script>
+
+  <!-- Test! -->
+  <script src="model.regression.js"></script>
+  <script src="viewmodel.regression.js"></script>
+  <script src="collection.regression.js"></script>
+  <script src='bindings.qunit.js'></script>
+  <script src='computed.qunit.js'></script>
+  <script src='integration.qunit.js'></script>
+
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture">
+    <div id='testElement'>
+      <h1>Test</h1>
+    </div>
+  </div>
+  <br>
+  <br>
+  <h1 id="qunit-header"><a href="#">Backbone Speed Suite</a></h1>
+  <div id="jslitmus_container" style="margin: 20px 10px;"></div>
+
+  <div id='testBindings'>
+    <p id='testVisible' data-test-visible='visible: isVisible'>visible</p>
+    <p id='testText' data-test-text='text: name'>unset</p>
+    <input id='testVal' data-test-val='val: name' value='unset' />
+  </div>
+
+  <div id='integrationTests'>
+    <p id='intVisible' data-bind-int='visible: isAdult'>Porn goes here!</p>
+    <p id='intText' data-bind-int='text: fullname'></p>
+    <input id='intVal' data-bind-int='val: occupation'></p>
+  </div>
+
+</body>
+</html>
