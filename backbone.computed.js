@@ -1,5 +1,22 @@
 (function(Backbone) {
 
+  // Add tracking to Backbone.Model
+  Backbone.Model.prototype.get = function(attr) {
+    Backbone.Computed.track(this, 'change:' + attr);
+    return this.attributes[attr];
+  };
+
+  // Add tracking to Backbone.Collection
+  function extendCollection(name) {
+    Backbone.Collection.prototype['_' + name] = Backbone.Collection.prototype[name];
+    Backbone.Collection.prototype[name] = function() {
+      Backbone.Computed.track(this, 'add remove reset change create sort');
+      return this['_' + name].apply(this, arguments);
+    };
+  }
+  _.each(['get', 'getByCid', 'where', 'pluck', 'clone', 'at', 'toJSON'], extendCollection);
+
+
   Backbone.Computed = function(attr, fn, context) {
     this.attr = attr;
     this.fn = fn;
@@ -29,11 +46,11 @@
     },
 
     remove: function(dependency) {
-      dependency.model.off('change:' + dependency.attr, this.onChange, this);
+      dependency.model.off(dependency.event, this.onChange, this);
     },
 
     add: function(dependency) {
-      dependency.model.on('change:' + dependency.attr, this.onChange, this);
+      dependency.model.on(dependency.event, this.onChange, this);
     }
 
   });
@@ -59,11 +76,11 @@
       return dependencies;
     },
 
-    track: function(model, attr) {
+    track: function(model, event) {
       if (Backbone.Computed._dependencies) {
         Backbone.Computed._dependencies.push({
           model: model,
-          attr: attr
+          event: event
         });
       }
     }

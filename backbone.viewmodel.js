@@ -71,7 +71,7 @@
 
     // Get the value of an attribute.
     get: function(attr) {
-      Backbone.Computed.track(this, attr);
+      Backbone.Computed.track(this, 'change:' + attr);
       return this.attributes[attr];
     },
 

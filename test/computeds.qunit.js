@@ -48,9 +48,10 @@ $(document).ready(function() {
     strictEqual(computations, 2, 'computation should be run twice');
   });
 
-return;
 
   test("filtering a model", function() {
+
+    var computations = 0;
 
     var model = new Backbone.ViewModel({
       players: new Backbone.Collection([
@@ -67,6 +68,7 @@ return;
     });
 
     vm.compute('topPlayers', function() {
+      computations++;
       var model = this.get('model');
       var limit = this.get('limit');
       var players = model.get('players').clone();
@@ -74,18 +76,21 @@ return;
         return b.get('points') - a.get('points');
       };
       players.sort();
-      return players.first(limit);
+      var result = players.first(limit);
+      return result;
     });
 
     var tops = vm.get('topPlayers');
 
     strictEqual(tops.length, 2, 'Top players length should be two');
+    strictEqual(computations, 1, 'One computation should have been run');
     strictEqual(tops[0].get('name'), 'Bob', 'Top player should be Bob');
     strictEqual(tops[1].get('name'), 'Charles', 'Next player should be Charles');
 
-    tops = vm.get('topPlayers');
     model.get('players').add({ name: 'Edgar', points: 4 });
+    tops = vm.get('topPlayers');
     strictEqual(tops[0].get('name'), 'Edgar', 'Top player should be Edgar after add');
+    strictEqual(computations, 2, 'Two computations should have been run');
 
   });
 
