@@ -9,7 +9,7 @@ $(document).ready(function() {
       base: 1
     });
 
-    vm.virtual('triple', function() {
+    vm.virtual('triple', function(attr) {
       computations++;
       return this.get('base') * 3;
     });
@@ -35,7 +35,7 @@ $(document).ready(function() {
       model: a
     });
 
-    b.virtual('triple', function() {
+    b.virtual('triple', function(attr) {
       computations++;
       return this.get('model').get('base') * 3;
     });
@@ -67,7 +67,7 @@ $(document).ready(function() {
       limit: 2
     });
 
-    vm.virtual('topPlayers', function() {
+    vm.virtual('topPlayers', function(attr) {
       computations++;
       var model = this.get('model');
       var limit = this.get('limit');
@@ -103,14 +103,14 @@ $(document).ready(function() {
     });
 
     var b = new Backbone.ViewModel();
-    b.virtual('fullname', function() {
+    b.virtual('fullname', function(attr) {
       return a.get('first') + ' ' + a.get('last');
     });
 
     var c = new Backbone.ViewModel({
       label: 'Full name: '
     });
-    c.virtual('caption', function() {
+    c.virtual('caption', function(attr) {
       computations++;
       return this.get('label') + b.get('fullname');
     });
@@ -128,5 +128,45 @@ $(document).ready(function() {
 
     strictEqual(Backbone.Virtual._computations.length, 0, 'computation stack should be clear');
   });
+
+test("object syntax on a virtual", function() {
+  var gets = 0, sets = 0;
+
+  var user = new Backbone.Model({
+    first: 'Hunter',
+    last: 'Loftis'
+  });
+
+  var vm = new Backbone.ViewModel({
+    model: user
+  });
+
+  vm.virtual('first', 'last', {
+    get: function(attr) {
+      gets++;
+      var model = this.get('model');
+      return model.get(attr);
+    },
+    set: function(attr, val) {
+      sets++;
+      var model = this.get('model');
+      return model.set(attr, val);
+    }
+  });
+
+  strictEqual(user.get('first'), 'Hunter', 'Model should have .first = Hunter');
+  strictEqual(user.get('last'), 'Loftis', 'Model should have .last = Loftis');
+  strictEqual(vm.get('first'), 'Hunter', 'ViewModel should have .first = Hunter');
+  strictEqual(vm.get('last'), 'Loftis', 'ViewModel should have .last = Loftis');
+
+  strictEqual(gets, 2, 'get should have been called twice');
+  strictEqual(sets, 0, 'set should not have been called');
+
+  user.set('first', 'Brooke');
+  strictEqual(vm.get('first'), 'Brooke', '.first should be Brooke after .set()');
+  strictEqual(gets, 3, 'gets should be three');
+
+  strictEqual(Backbone.Virtual._computations.length, 0, 'computation stack should be clear');
+});
 
 });

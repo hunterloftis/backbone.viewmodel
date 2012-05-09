@@ -19,18 +19,10 @@
   _.each(['get', 'getByCid', 'where', 'pluck', 'clone', 'at', 'toJSON'], extendCollection);
 
 
-  Backbone.Virtual = function(attr, fn, context) {
-    this.attr = attr;
-    if (typeof(fn) === 'function') {
-      this.get = fn;
-      this.safe = false;
-    }
-    else {
-      // extend with: get, safe
-      _.extend(this, fn);
-      this.safe = fn.hasOwnProperty('fail');
-    }
-    this.context = context;
+  // Options = model, attr, get, set, fail
+  Backbone.Virtual = function(options) {
+    console.log("Options:", options);
+    _.extend(this, options);
     this.dependencies = [];
     this.result = undefined;
   };
@@ -39,16 +31,16 @@
 
     run: function() {
       Backbone.Virtual.startTracking();
-      if (this.safe) {
+      if (this.hasOwnProperty('fail')) {
         try {
-          this.result = this.get.call(this.context);
+          this.result = this.get.call(this.model, this.attr);
         }
         catch (e) {
           this.result = this.fail;
         }
       }
       else {
-        this.result = this.get.call(this.context);
+        this.result = this.get.call(this.model, this.attr);
       }
       this.update(Backbone.Virtual.stopTracking());
       this.trigger('change', this);
@@ -71,6 +63,20 @@
 
     add: function(dependency) {
       dependency.model.on(dependency.event, this.onChange, this);
+    },
+
+    // Default virtual .get()
+    get: function(attr) {
+      var model = (typeof this.reference === 'function') ?
+        this.reference() : this.reference;
+      return model[attr];
+    },
+
+    // Default virtual .set()
+    set: function(attr, val) {
+      var model = (typeof this.reference === 'function') ?
+        this.reference() : this.reference;
+      return model.set(attr, val);
     }
 
   });
