@@ -15,13 +15,13 @@ $(document).ready(function() {
       model: undefined,
       occupation: ''
     });
-    vm.compute('isAdult', {
+    vm.virtual('isAdult', {
       fail: false,
       get: function() {
         return this.get('model').get('age') >= 18;
       }
     });
-    vm.compute('fullname', {
+    vm.virtual('fullname', {
       fail: '',
       get: function() {
         var model = this.get('model');

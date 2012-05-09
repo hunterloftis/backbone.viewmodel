@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-  module("Backbone.ViewModel.compute()");
+  module("Backbone.ViewModel.virtual()");
 
   test("tracking a simple computation within a ViewModel", function() {
     var computations = 0;
@@ -9,7 +9,7 @@ $(document).ready(function() {
       base: 1
     });
 
-    vm.compute('triple', function() {
+    vm.virtual('triple', function() {
       computations++;
       return this.get('base') * 3;
     });
@@ -21,7 +21,7 @@ $(document).ready(function() {
     strictEqual(vm.get('triple'), 6, 'computation should be 6 after base update');
     strictEqual(computations, 2, 'computation should be run twice');
 
-    strictEqual(Backbone.Computed._computations.length, 0, 'computation stack should be clear');
+    strictEqual(Backbone.Virtual._computations.length, 0, 'computation stack should be clear');
   });
 
   test("tracking a simple computation across ViewModels", function() {
@@ -35,7 +35,7 @@ $(document).ready(function() {
       model: a
     });
 
-    b.compute('triple', function() {
+    b.virtual('triple', function() {
       computations++;
       return this.get('model').get('base') * 3;
     });
@@ -47,7 +47,7 @@ $(document).ready(function() {
     strictEqual(b.get('triple'), 6, 'computation should be 6 after base update');
     strictEqual(computations, 2, 'computation should be run twice');
 
-    strictEqual(Backbone.Computed._computations.length, 0, 'computation stack should be clear');
+    strictEqual(Backbone.Virtual._computations.length, 0, 'computation stack should be clear');
   });
 
   test("filtering a model", function() {
@@ -67,7 +67,7 @@ $(document).ready(function() {
       limit: 2
     });
 
-    vm.compute('topPlayers', function() {
+    vm.virtual('topPlayers', function() {
       computations++;
       var model = this.get('model');
       var limit = this.get('limit');
@@ -91,7 +91,7 @@ $(document).ready(function() {
     strictEqual(tops[0].get('name'), 'Edgar', 'Top player should be Edgar after add');
     strictEqual(computations, 2, 'Two computations should have been run');
 
-    strictEqual(Backbone.Computed._computations.length, 0, 'computation stack should be clear');
+    strictEqual(Backbone.Virtual._computations.length, 0, 'computation stack should be clear');
   });
 
   test("tracking nested computations", function() {
@@ -103,14 +103,14 @@ $(document).ready(function() {
     });
 
     var b = new Backbone.ViewModel();
-    b.compute('fullname', function() {
+    b.virtual('fullname', function() {
       return a.get('first') + ' ' + a.get('last');
     });
 
     var c = new Backbone.ViewModel({
       label: 'Full name: '
     });
-    c.compute('caption', function() {
+    c.virtual('caption', function() {
       computations++;
       return this.get('label') + b.get('fullname');
     });
@@ -126,7 +126,7 @@ $(document).ready(function() {
     strictEqual(c.get('caption'), 'My name: Brooke Loftis', 'caption should be My name: Brooke Loftis');
     strictEqual(computations, 3, 'three computations should have run');
 
-    strictEqual(Backbone.Computed._computations.length, 0, 'computation stack should be clear');
+    strictEqual(Backbone.Virtual._computations.length, 0, 'computation stack should be clear');
   });
 
 });

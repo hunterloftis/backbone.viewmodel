@@ -2,7 +2,7 @@
 
   // Add tracking to Backbone.Model
   Backbone.Model.prototype.get = function(attr) {
-    Backbone.Computed.track(this, 'change:' + attr);
+    Backbone.Virtual.track(this, 'change:' + attr);
     return this.attributes[attr];
   };
 
@@ -11,15 +11,15 @@
     Backbone.Collection.prototype['_' + name] = Backbone.Collection.prototype[name];
     Backbone.Collection.prototype[name] = function() {
       // Trigger an update on any write operation...
-      Backbone.Computed.track(this, 'add remove reset change create sort');
+      Backbone.Virtual.track(this, 'add remove reset change create sort');
       return this['_' + name].apply(this, arguments);
     };
   }
-  // ...if a Computed function performs a Collection read operation:
+  // ...if a Virtual function performs a Collection read operation:
   _.each(['get', 'getByCid', 'where', 'pluck', 'clone', 'at', 'toJSON'], extendCollection);
 
 
-  Backbone.Computed = function(attr, fn, context) {
+  Backbone.Virtual = function(attr, fn, context) {
     this.attr = attr;
     if (typeof(fn) === 'function') {
       this.get = fn;
@@ -35,10 +35,10 @@
     this.result = undefined;
   };
 
-  _.extend(Backbone.Computed.prototype, Backbone.Events, {
+  _.extend(Backbone.Virtual.prototype, Backbone.Events, {
 
     run: function() {
-      Backbone.Computed.startTracking();
+      Backbone.Virtual.startTracking();
       if (this.safe) {
         try {
           this.result = this.get.call(this.context);
@@ -50,7 +50,7 @@
       else {
         this.result = this.get.call(this.context);
       }
-      this.update(Backbone.Computed.stopTracking());
+      this.update(Backbone.Virtual.stopTracking());
       this.trigger('change', this);
       return this.result;
     },
@@ -75,30 +75,30 @@
 
   });
 
-  _.extend(Backbone.Computed, {
+  _.extend(Backbone.Virtual, {
     _computations: [],
     _dependencies: undefined,
 
     startTracking: function() {
       // Create a new array for tracking dependencies of this compute function
-      Backbone.Computed._dependencies = [];
+      Backbone.Virtual._dependencies = [];
       // Push the new tracking array onto the stack of computations
-      Backbone.Computed._computations.push(Backbone.Computed._dependencies);
+      Backbone.Virtual._computations.push(Backbone.Virtual._dependencies);
     },
 
     stopTracking: function() {
       // Pop the tracking array off of the stack
-      var dependencies = Backbone.Computed._computations.pop();
+      var dependencies = Backbone.Virtual._computations.pop();
       // Point the tracking array to the next item on the stack
-      Backbone.Computed._dependencies = Backbone.Computed._computations.length ?
-        Backbone.Computed._computations(Backbone.Computed._computations.length - 1) :
+      Backbone.Virtual._dependencies = Backbone.Virtual._computations.length ?
+        Backbone.Virtual._computations(Backbone.Virtual._computations.length - 1) :
         undefined;
       return dependencies;
     },
 
     track: function(model, event) {
-      if (Backbone.Computed._dependencies) {
-        Backbone.Computed._dependencies.push({
+      if (Backbone.Virtual._dependencies) {
+        Backbone.Virtual._dependencies.push({
           model: model,
           event: event
         });

@@ -3,8 +3,8 @@
   Backbone.ViewModel = Backbone.Model.extend({
 
     initialize: function(attributes, options) {
+      this._virtuals = {};
       this._bindings = [];
-      this._computes = {};
     },
 
     bindView: function(attribute, container) {
@@ -71,19 +71,19 @@
 
     // Get the value of an attribute.
     get: function(attr) {
-      Backbone.Computed.track(this, 'change:' + attr);
+      Backbone.Virtual.track(this, 'change:' + attr);
       return this.attributes[attr];
     },
 
-    compute: function(attr, fn) {
-      var newComputed = new Backbone.Computed(attr, fn, this);
-      this._computes[attr] = newComputed;
-      newComputed.on('change', this.onCompute, this);
-      newComputed.run();
+    virtual: function(attr, fn) {
+      var newVirtual = new Backbone.Virtual(attr, fn, this);
+      this._virtuals[attr] = newVirtual;
+      newVirtual.on('change', this.onVirtual, this);
+      newVirtual.run();
     },
 
-    onCompute: function(compute) {
-      this.set(compute.attr, compute.result);
+    onVirtual: function(virtual) {
+      this.set(virtual.attr, virtual.result);
     }
 
   });
