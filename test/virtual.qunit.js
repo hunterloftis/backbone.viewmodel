@@ -169,4 +169,58 @@ test("object syntax on a virtual", function() {
   strictEqual(Backbone.Virtual._computations.length, 0, 'computation stack should be clear');
 });
 
+test("function passthrough syntax on a virtual", function() {
+  var gets = 0, sets = 0;
+
+  var user = new Backbone.Model({
+    first: 'Hunter',
+    last: 'Loftis'
+  });
+
+  var vm = new Backbone.ViewModel({
+    model: user
+  });
+
+  vm.virtual('first', 'last', function() {
+    gets++;
+    return this.get('model');
+  });
+
+  strictEqual(user.get('first'), 'Hunter', 'Model should have .first = Hunter');
+  strictEqual(user.get('last'), 'Loftis', 'Model should have .last = Loftis');
+  strictEqual(vm.get('first'), 'Hunter', 'ViewModel should have .first = Hunter');
+  strictEqual(vm.get('last'), 'Loftis', 'ViewModel should have .last = Loftis');
+
+  strictEqual(gets, 2, 'get should have been called twice');
+  strictEqual(sets, 0, 'set should not have been called');
+
+  user.set('first', 'Brooke');
+  strictEqual(vm.get('first'), 'Brooke', '.first should be Brooke after .set()');
+  strictEqual(gets, 3, 'gets should be three');
+
+  strictEqual(Backbone.Virtual._computations.length, 0, 'computation stack should be clear');
+});
+
+test("model passthrough syntax on a virtual", function() {
+
+  var user = new Backbone.Model({
+    first: 'Hunter',
+    last: 'Loftis'
+  });
+
+  var vm = new Backbone.ViewModel();
+
+  vm.virtual('first', 'last', user);
+
+  strictEqual(user.get('first'), 'Hunter', 'Model should have .first = Hunter');
+  strictEqual(user.get('last'), 'Loftis', 'Model should have .last = Loftis');
+  strictEqual(vm.get('first'), 'Hunter', 'ViewModel should have .first = Hunter');
+  strictEqual(vm.get('last'), 'Loftis', 'ViewModel should have .last = Loftis');
+
+  user.set('first', 'Brooke');
+  strictEqual(vm.get('first'), 'Brooke', '.first should be Brooke after .set()');
+
+  strictEqual(Backbone.Virtual._computations.length, 0, 'computation stack should be clear');
+});
+
 });

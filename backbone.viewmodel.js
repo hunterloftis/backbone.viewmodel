@@ -79,41 +79,32 @@
       var args = _.toArray(arguments);
       var action = args[args.length - 1];
       var attrs = args.slice(0, args.length - 1);
-      var get, set, fail, reference;
+      var options = {};
       if (action instanceof Backbone.Model) {
         // Passthrough model syntax
-        reference = action;
+        options.reference = action;
       }
       else if (typeof action === 'function') {
         if (action.length === 0) {
           // Passthrough function syntax (function returns model)
-          reference = action;
+          options.reference = action;
         }
         else {
           // Getter-only syntax
-          get = action;
+          options.get = action;
         }
       }
       else {
         // Object syntax (get, set, fail all optional)
-        get = action.get;
-        set = action.set;
-        fail = action.fail;
-        reference = action.reference;
+        options = action;
       }
-      return _.map(attrs, this.createVirtual({
-        model: this,
-        get: get,
-        set: set,
-        fail: fail,
-        reference: reference
-      }), this);
+      options.model = this;
+      return _.map(attrs, this.createVirtual(options), this);
     },
 
     createVirtual: function(options) {
       var self = this;
       return function(attr) {
-        console.log("Creating virtual for attr", attr);
         var opts = _.extend({}, options, { attr: attr });
         var newVirtual = new Backbone.Virtual(opts);
         self._virtuals[attr] = newVirtual;

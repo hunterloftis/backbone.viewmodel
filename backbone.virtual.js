@@ -21,7 +21,6 @@
 
   // Options = model, attr, get, set, fail
   Backbone.Virtual = function(options) {
-    console.log("Options:", options);
     _.extend(this, options);
     this.dependencies = [];
     this.result = undefined;
@@ -33,14 +32,14 @@
       Backbone.Virtual.startTracking();
       if (this.hasOwnProperty('fail')) {
         try {
-          this.result = this.get.call(this.model, this.attr);
+          this.result = this.get.call(this.model, this.attr, this);
         }
         catch (e) {
           this.result = this.fail;
         }
       }
       else {
-        this.result = this.get.call(this.model, this.attr);
+        this.result = this.get.call(this.model, this.attr, this);
       }
       this.update(Backbone.Virtual.stopTracking());
       this.trigger('change', this);
@@ -66,16 +65,18 @@
     },
 
     // Default virtual .get()
-    get: function(attr) {
-      var model = (typeof this.reference === 'function') ?
-        this.reference() : this.reference;
-      return model[attr];
+    // TODO: remove the typeof checks in the getters/setters
+    get: function(attr, virtual) {
+      var model = (typeof virtual.reference === 'function') ?
+        virtual.reference.call(this) : virtual.reference;
+      return model.get(attr);
     },
 
     // Default virtual .set()
-    set: function(attr, val) {
-      var model = (typeof this.reference === 'function') ?
-        this.reference() : this.reference;
+    // TODO: remove the typeof checks in the getters/setters
+    set: function(attr, val, virtual) {
+      var model = (typeof virtual.reference === 'function') ?
+        virtual.reference.call(this) : virtual.reference;
       return model.set(attr, val);
     }
 
