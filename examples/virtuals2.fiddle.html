@@ -47,14 +47,14 @@
   })
 
   <!-- Bound View -->
-  <div data-style='css: {dark: isDark}'>
-    <a href='#' data-switch='click: firstUser'>First user</a>
-    <a href='#' data-switch='click: secondUser'>Second user</a>
+  <div data-style='css(dark, isDark); css(big, isBig)'>
+    <a href='#' data-switch='click(setUser, 0)'>First user</a>
+    <a href='#' data-switch='click(setUser, 1)'>Second user</a>
 
-    <input data-editor='val: first' placeholder='first'></div>
-    <input data-editor='val: last' placeholder='last'></div>
+    <input data-editor='val(first)' placeholder='first'></div>
+    <input data-editor='val(last)' placeholder='last'></div>
 
-    <p data-profile='text: fullname'></p>
+    <p data-profile='text(fullname)'></p>
   </div>
 
   <!-- Platform dependencies -->
@@ -95,6 +95,15 @@
         this.set('userIndex', 1);
       }
     });
+    // TODO: the difference between this (with `attr`) and the editor
+    // virtual (without arguments) is non-obvious. Find a better
+    // syntax to differentiate between a getter-only definition (as here)
+    // and a model-evaluation definition (as below)
+    //
+    // It may be a good idea to alias 'virtual' with different signatures
+    // eg, switchVM.compute() would take a single get()
+    // switchVM.pass() would take a model-evaluator fn() or a model instance
+    // switchVM.virtual() would take the full object
     switchVM.virtual('activeUser', function get(attr) {
       var model = this.get('model');
       var index = this.get('userIndex');

@@ -151,7 +151,8 @@ test("object syntax on a virtual", function() {
       sets++;
       var model = this.get('model');
       return model.set(attr, val);
-    }
+    },
+    fail: 'error'
   });
 
   strictEqual(user.get('first'), 'Hunter', 'Model should have .first = Hunter');
@@ -171,6 +172,10 @@ test("object syntax on a virtual", function() {
   strictEqual(vm.get('first'), 'Amy', 'ViewModel should have first: Amy');
   strictEqual(user.get('first'), 'Amy', 'Model should have first: Amy');
   strictEqual(sets, 1, 'set should have been called once');
+
+  vm.set('model', undefined);
+  strictEqual(vm.get('first'), 'error', 'first should be "error" when model is failing');
+  strictEqual(vm.get('last'), 'error', 'last should be "error" when model is failing');
 
   strictEqual(Backbone.Virtual._computations.length, 0, 'computation stack should be clear');
 });
