@@ -5,14 +5,31 @@
 </head>
 <body>
 
+  We need a way to pass more complex parameters into bindings.
+
+  css needs to know: 'css' type, [list] of class:value pairs
+  click needs to know: 'click' type, fn() to call, [arguments] to fn()
+
+  css: { class: attribute, class: attribute }
+  click: fn(arg1, arg2)
+
+  css: { dark: true } // should work
+  css: { dark: isDark } // should work
+  click: setUser(0) // should work
+  click: setUser(activeUser) // maybe should work
+  val: someAttr // should work
+  val: { data: someAttr, trigger: 'keyup change' } // should work
+
   <!-- Bound View -->
-  <a href='#' data-switch='click: firstUser'>First user</a>
-  <a href='#' data-switch='click: secondUser'>Second user</a>
+  <div data-style='css: {dark: isDark}'>
+    <a href='#' data-switch='click: firstUser'>First user</a>
+    <a href='#' data-switch='click: secondUser'>Second user</a>
 
-  <input data-editor='val: first' placeholder='first'></div>
-  <input data-editor='val: last' placeholder='last'></div>
+    <input data-editor='val: first' placeholder='first'></div>
+    <input data-editor='val: last' placeholder='last'></div>
 
-  <p data-profile='text: fullname'></p>
+    <p data-profile='text: fullname'></p>
+  </div>
 
   <!-- Platform dependencies -->
   <script src='../vendor/zepto-1.0rc1.js'></script>
