@@ -74,7 +74,7 @@
 
     // Default virtual .set()
     // TODO: remove the typeof checks in the getters/setters
-    set: function(attr, val, virtual) {
+    set: function(attr, val, options, virtual) {
       var model = (typeof virtual.reference === 'function') ?
         virtual.reference.call(this) : virtual.reference;
       return model.set(attr, val);

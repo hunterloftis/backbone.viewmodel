@@ -166,6 +166,10 @@ test("object syntax on a virtual", function() {
   strictEqual(vm.get('first'), 'Brooke', '.first should be Brooke after .set()');
   strictEqual(gets, 3, 'gets should be three');
 
+  vm.set('first', 'Amy');
+  strictEqual(vm.get('first'), 'Amy', 'ViewModel should have first: Amy');
+  strictEqual(user.get('first'), 'Amy', 'Model should have first: Amy');
+
   strictEqual(Backbone.Virtual._computations.length, 0, 'computation stack should be clear');
 });
 

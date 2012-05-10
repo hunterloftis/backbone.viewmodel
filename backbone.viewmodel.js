@@ -7,6 +7,14 @@
       this._bindings = [];
     },
 
+    set: function(key, value, options) {
+      // Call virtual's set() unless this was triggered by a dependency change
+      if (!(options && options.dependency) && this._virtuals && this._virtuals.hasOwnProperty(key)) {
+        return this._virtuals[key].set.call(this, key, value, options);
+      }
+      return Backbone.Model.prototype.set.apply(this, arguments);
+    },
+
     bindView: function(attribute, container) {
       container = container || 'body';
       var nodes = $(container).find('*[' + attribute + ']');
@@ -114,7 +122,7 @@
     },
 
     onVirtual: function(virtual) {
-      this.set(virtual.attr, virtual.result);
+      this.set(virtual.attr, virtual.result, { dependency: true });
     }
 
   });
