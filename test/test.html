@@ -42,15 +42,15 @@
   <div id="jslitmus_container" style="margin: 20px 10px;"></div>
 
   <div id='testBindings'>
-    <p id='testVisible' data-test-visible='visible: isVisible'>visible</p>
-    <p id='testText' data-test-text='text: name'>unset</p>
-    <input id='testVal' data-test-val='val: name' value='unset' />
+    <p id='testVisible' data-test-visible='visible(isVisible)'>visible</p>
+    <p id='testText' data-test-text='text(name)'>unset</p>
+    <input id='testVal' data-test-val='val(name)' value='unset' />
   </div>
 
   <div id='integrationTests'>
-    <p id='intVisible' data-bind-int='visible: isAdult'>Porn goes here!</p>
-    <p id='intText' data-bind-int='text: fullname'></p>
-    <input id='intVal' data-bind-int='val: occupation'></p>
+    <p id='intVisible' data-bind-int='visible(isAdult)'>Porn goes here!</p>
+    <p id='intText' data-bind-int='text(fullname)'></p>
+    <input id='intVal' data-bind-int='val(occupation)'></p>
   </div>
 
 </body>
