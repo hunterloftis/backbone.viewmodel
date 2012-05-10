@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-  module("Independent Bindings");
+  module("Backbone.Binding");
 
   test("'visible' binding", function() {
 
