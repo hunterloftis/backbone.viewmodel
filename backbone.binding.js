@@ -1,7 +1,7 @@
 (function(Backbone) {
 
   // Generic Binding (all bindings inherit from this)
-  // description is an object with: node, viewModel, attribute
+  // description is an object with: node, viewModel, args, type
   Backbone.Binding = function(description) {
     _.bindAll(this);
     _.extend(this, description);

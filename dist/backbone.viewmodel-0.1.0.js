@@ -48,7 +48,7 @@
         if (self.isBoundTo(node)) return;
 
         var bindingString = $(node).attr(attribute);
-        var bindingList = bindingString.split(',');
+        var bindingList = bindingString.split(';');
         var descriptions = _.map(bindingList, self.parseBinding(node));
 
         _.each(descriptions, self.createBinding, self);
@@ -58,16 +58,40 @@
     parseBinding: function(node) {
       var self = this;
       return function(bindingPair) {
-        var bindingSplit = bindingPair.split(':');
-        var type = bindingSplit[0].trim();
-        var attribute = bindingSplit[1].trim();
+        var typeSplit = bindingPair.split('(');
+        var type = typeSplit[0].trim();
+        var argString = typeSplit[1].trim().slice(0, -1);
+        var args = argString.split(',');
+        args = _.map(args, self.parseArgument);
+        // TODO: identify special data types here --
+        // undefined, null, Numbers, Strings, true/false
         return {
-          type: type,
           node: node,
           viewModel: self,
-          attribute: attribute
+          type: type,
+          args: args
         };
       };
+    },
+
+    parseArgument: function(arg) {
+      arg = arg.trim();
+      var map = {
+        'undefined': undefined,
+        'null': null,
+        'true': true,
+        'false': false
+      };
+      if (map[arg]) {
+        arg = map[arg];
+      }
+      else if (arg.charAt[0] === '"' || arg.charAt[0] === "'") {
+        // TODO: figure out what to do about string literals
+      }
+      else if (!isNaN(arg)) {
+        arg = Number(arg);
+      }
+      return arg;
     },
 
     createBinding: function(description) {
@@ -246,11 +270,11 @@
 })(Backbone);(function(Backbone) {
 
   // Generic Binding (all bindings inherit from this)
-  // description is an object with: node, viewModel, attribute
+  // description is an object with: node, viewModel, args, type
   Backbone.Binding = function(description) {
     _.bindAll(this);
     _.extend(this, description);
-    this.initialize.apply(this, arguments);
+    this.initialize.apply(this, description.args);
   };
 
   _.extend(Backbone.Binding.prototype, {
@@ -272,6 +296,9 @@
 
   // Visible Binding
   var VisibleBinding = Backbone.Binding['visible'] = Backbone.Binding.extend({
+    initialize: function(attr) {
+      this.attribute = attr;
+    },
     onModelChange: function() {
       var val = this.viewModel.get(this.attribute);
       if (val) {
@@ -283,6 +310,9 @@
 
   // Text Binding
   var TextBinding = Backbone.Binding['text'] = Backbone.Binding.extend({
+    initialize: function(attr) {
+      this.attribute = attr;
+    },
     onModelChange: function() {
       var val = this.viewModel.get(this.attribute);
       $(this.node).text(val);
@@ -291,6 +321,9 @@
 
   // Value Binding
   var ValueBinding = Backbone.Binding['val'] = Backbone.Binding.extend({
+    initialize: function(attr) {
+      this.attribute = attr;
+    },
     start: function() {
       Backbone.Binding.prototype.start.apply(this, arguments);
       $(this.node).on('keyup change', this.onViewChange);
@@ -311,15 +344,50 @@
 
   // Click Binding
   var ClickBinding = Backbone.Binding['click'] = Backbone.Binding.extend({
+    initialize: function() {
+      var args = _.toArray(arguments);
+      this.callback = args.shift();
+      this.args = args;
+    },
     start: function() {
       $(this.node).on('click', this.onViewChange);
     },
     onViewChange: function(event) {
       event.preventDefault();
-      this.viewModel.get(this.attribute).call(this.viewModel);
+      this.viewModel.get(this.callback).apply(this.viewModel, this.args);
     },
     stop: function() {
       $(this.node).off('click', this.onViewChange);
+    }
+  });
+
+  // CSS Class Binding
+  var CssBinding = Backbone.Binding['css'] = Backbone.Binding.extend({
+    initialize: function(className, attr) {
+      this.className = className;
+      this.attr = attr;
+    },
+    onModelChange: function() {
+      var val = this.viewModel.get(this.attr);
+      if (val) {
+        $(this.node).addClass(this.className);
+      }
+      else {
+        $(this.node).removeClass(this.className);
+      }
+    }
+  });
+
+  // Each binding
+  var EachBinding = Backbone.Binding['each'] = Backbone.Binding.extend({
+    initialize: function(collection) {
+      this.collection = collection;
+    },
+    start: function() {
+
+    },
+    stop: function() {
+
     }
   });
 

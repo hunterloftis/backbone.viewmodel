@@ -2,12 +2,6 @@
 <html>
 <head>
   <title>Backbone.ViewModel Todo List Example</title>
-</head>
-<body>
-
-  <ul data-list='each(todo)'>
-    <li data-list='text(task)'></li>
-  </ul>
 
   <!-- Platform dependencies -->
   <script src='../vendor/zepto-1.0rc1.js'></script>
@@ -20,22 +14,68 @@
   <script src='../backbone.binding.js'></script>
   <script src='../lib/bindings.js'></script>
 
+</head>
+<body>
+
+  <!-- VIEW layer -->
+
+  <a href='#' data-list='click(setFilter, all)'>All</a>
+  <a href='#' data-list='click(setFilter, remaining)'>Remaining</a>
+  <a href='#' data-list='click(setFilter, complete)'>Complete</a>
+
+  <ul data-list='each(todos)'>
+    <li data-list='css(done, isDone)'>
+      <input type='checkbox' data-list='val(isDone)'/>
+      <p data-list='text(task); click(edit)'></p>
+    </li>
+  </ul>
+
   <script>
 
+    // MODEL Layer
+
     var Todo = Backbone.Model.extend({
-      task: '',
-      done: false
+      defaults: {
+        task: '',
+        done: false
+      }
     });
 
     var list = new Backbone.Collection({
       model: Todo
     });
 
-    var listVM = new Backbone.ViewModel({
 
+    // VIEW-MODEL Layer
+
+    var filters = {
+      all: function(todo) {
+        return true;
+      },
+      remaining: function(todo) {
+        return !todo.get('done');
+      },
+      complete: function(todo) {
+        return todo.get('done');
+      }
+    };
+
+    var listVM = new Backbone.ViewModel({
+      list: list,
+      filter: 'all',
+      setFilter: function(name) {
+        this.set('filter', name);
+      }
+    });
+
+    listVM.compute('todos', function() {
+      var list = this.get('list');
+      var filterKey = this.get('filter');
+      return _.filter(list, filters[filterKey]);
     });
 
     simpleVM.bindView('data-list');
+
   </script>
 
 </body>
