@@ -90,29 +90,23 @@
       return this.attributes[attr];
     },
 
-    virtual: function() {
+    compute: function() {
       var args = _.toArray(arguments);
-      var action = args[args.length - 1];
-      var attrs = args.slice(0, args.length - 1);
-      var options = {};
-      if (action instanceof Backbone.Model) {
-        // Passthrough model syntax
-        options.reference = action;
-      }
-      else if (typeof action === 'function') {
-        if (action.length === 0) {
-          // Passthrough function syntax (function returns model)
-          options.reference = action;
-        }
-        else {
-          // Getter-only syntax
-          options.get = action;
-        }
-      }
-      else {
-        // Object syntax (get, set, fail all optional)
-        options = action;
-      }
+      var get = args.pop();
+      args.push({ get: get });
+      this.virtual.apply(this, args);
+    },
+
+    pass: function() {
+      var args = _.toArray(arguments);
+      var reference = args.pop();
+      args.push({ reference: reference });
+      this.virtual.apply(this, args);
+    },
+
+    virtual: function() {
+      var attrs = _.toArray(arguments);
+      var options = attrs.pop();
       options.model = this;
       return _.map(attrs, this.createVirtual(options), this);
     },

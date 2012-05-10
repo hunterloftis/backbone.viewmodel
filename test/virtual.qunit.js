@@ -9,7 +9,7 @@ $(document).ready(function() {
       base: 1
     });
 
-    vm.virtual('triple', function(attr) {
+    vm.compute('triple', function() {
       computations++;
       return this.get('base') * 3;
     });
@@ -35,7 +35,7 @@ $(document).ready(function() {
       model: a
     });
 
-    b.virtual('triple', function(attr) {
+    b.compute('triple', function() {
       computations++;
       return this.get('model').get('base') * 3;
     });
@@ -67,7 +67,7 @@ $(document).ready(function() {
       limit: 2
     });
 
-    vm.virtual('topPlayers', function(attr) {
+    vm.compute('topPlayers', function() {
       computations++;
       var model = this.get('model');
       var limit = this.get('limit');
@@ -103,14 +103,14 @@ $(document).ready(function() {
     });
 
     var b = new Backbone.ViewModel();
-    b.virtual('fullname', function(attr) {
+    b.compute('fullname', function() {
       return a.get('first') + ' ' + a.get('last');
     });
 
     var c = new Backbone.ViewModel({
       label: 'Full name: '
     });
-    c.virtual('caption', function(attr) {
+    c.compute('caption', function() {
       computations++;
       return this.get('label') + b.get('fullname');
     });
@@ -192,7 +192,7 @@ test("function passthrough syntax on a virtual", function() {
     model: user
   });
 
-  vm.virtual('first', 'last', function() {
+  vm.pass('first', 'last', function(attr) {
     gets++;
     return this.get('model');
   });
@@ -225,7 +225,7 @@ test("model passthrough syntax on a virtual", function() {
 
   var vm = new Backbone.ViewModel();
 
-  vm.virtual('first', 'last', user);
+  vm.pass('first', 'last', user);
 
   strictEqual(user.get('first'), 'Hunter', 'Model should have .first = Hunter');
   strictEqual(user.get('last'), 'Loftis', 'Model should have .last = Loftis');
