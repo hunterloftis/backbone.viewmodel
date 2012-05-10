@@ -165,10 +165,12 @@ test("object syntax on a virtual", function() {
   user.set('first', 'Brooke');
   strictEqual(vm.get('first'), 'Brooke', '.first should be Brooke after .set()');
   strictEqual(gets, 3, 'gets should be three');
+  strictEqual(sets, 0, 'set should not have been called');
 
   vm.set('first', 'Amy');
   strictEqual(vm.get('first'), 'Amy', 'ViewModel should have first: Amy');
   strictEqual(user.get('first'), 'Amy', 'Model should have first: Amy');
+  strictEqual(sets, 1, 'set should have been called once');
 
   strictEqual(Backbone.Virtual._computations.length, 0, 'computation stack should be clear');
 });
@@ -227,6 +229,10 @@ test("model passthrough syntax on a virtual", function() {
 
   user.set('first', 'Brooke');
   strictEqual(vm.get('first'), 'Brooke', '.first should be Brooke after .set()');
+
+  vm.set('first', 'Amy');
+  strictEqual(vm.get('first'), 'Amy', 'ViewModel should have first: Amy');
+  strictEqual(user.get('first'), 'Amy', 'Model should have first: Amy');
 
   strictEqual(Backbone.Virtual._computations.length, 0, 'computation stack should be clear');
 });

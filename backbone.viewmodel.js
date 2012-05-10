@@ -7,11 +7,17 @@
       this._bindings = [];
     },
 
+    // TODO: This probably gets called twice whenever a virtual value is manually set()
+    // Once for when the property is initially set, then when the property triggers its referenced model to change
+    // the model change will trigger this set() again. Try to eliminate this inefficiency.
     set: function(key, value, options) {
-      var virtual = this._virtuals && this._virtuals.hasOwnProperty(key) && this._virtuals[key];
+      var virtual;
       // Call virtual's set() unless this was triggered by a dependency change
-      if (!(options && options.dependency) && virtual) {
-        return virtual.set.call(this, key, value, options, virtual);
+      if (!(options && options.dependency)) {
+        virtual = this._virtuals && this._virtuals.hasOwnProperty(key) && this._virtuals[key];
+        if (virtual) {
+          return virtual.set.call(this, key, value, options, virtual);
+        }
       }
       return Backbone.Model.prototype.set.apply(this, arguments);
     },
