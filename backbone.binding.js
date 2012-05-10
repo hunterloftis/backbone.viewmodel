@@ -5,7 +5,7 @@
   Backbone.Binding = function(description) {
     _.bindAll(this);
     _.extend(this, description);
-    this.initialize.apply(this, arguments);
+    this.initialize.apply(this, description.args);
   };
 
   _.extend(Backbone.Binding.prototype, {

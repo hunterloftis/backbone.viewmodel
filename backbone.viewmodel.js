@@ -48,7 +48,7 @@
         if (self.isBoundTo(node)) return;
 
         var bindingString = $(node).attr(attribute);
-        var bindingList = bindingString.split(',');
+        var bindingList = bindingString.split(';');
         var descriptions = _.map(bindingList, self.parseBinding(node));
 
         _.each(descriptions, self.createBinding, self);
@@ -58,16 +58,40 @@
     parseBinding: function(node) {
       var self = this;
       return function(bindingPair) {
-        var bindingSplit = bindingPair.split(':');
-        var type = bindingSplit[0].trim();
-        var attribute = bindingSplit[1].trim();
+        var typeSplit = bindingPair.split('(');
+        var type = typeSplit[0].trim();
+        var argString = typeSplit[1].trim().slice(0, -1);
+        var args = argString.split(',');
+        args = _.map(args, self.parseArgument);
+        // TODO: identify special data types here --
+        // undefined, null, Numbers, Strings, true/false
         return {
-          type: type,
           node: node,
           viewModel: self,
-          attribute: attribute
+          type: type,
+          args: args
         };
       };
+    },
+
+    parseArgument: function(arg) {
+      arg = arg.trim();
+      var map = {
+        'undefined': undefined,
+        'null': null,
+        'true': true,
+        'false': false
+      };
+      if (map[arg]) {
+        arg = map[arg];
+      }
+      else if (arg.charAt[0] === '"' || arg.charAt[0] === "'") {
+        // TODO: figure out what to do about string literals
+      }
+      else if (!isNaN(arg)) {
+        arg = Number(arg);
+      }
+      return arg;
     },
 
     createBinding: function(description) {
