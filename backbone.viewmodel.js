@@ -8,9 +8,10 @@
     },
 
     set: function(key, value, options) {
+      var virtual = this._virtuals && this._virtuals.hasOwnProperty(key) && this._virtuals[key];
       // Call virtual's set() unless this was triggered by a dependency change
-      if (!(options && options.dependency) && this._virtuals && this._virtuals.hasOwnProperty(key)) {
-        return this._virtuals[key].set.call(this, key, value, options);
+      if (!(options && options.dependency) && virtual) {
+        return virtual.set.call(this, key, value, options, virtual);
       }
       return Backbone.Model.prototype.set.apply(this, arguments);
     },
