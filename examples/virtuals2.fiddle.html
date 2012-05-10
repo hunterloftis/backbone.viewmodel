@@ -88,23 +88,11 @@
     var switchVM = new Backbone.ViewModel({
       model: users,
       userIndex: 0,
-      firstUser: function() {
-        this.set('userIndex', 0);
-      },
-      secondUser: function() {
-        this.set('userIndex', 1);
+      setUser: function(index) {
+        this.set('userIndex', index);
       }
     });
-    // TODO: the difference between this (with `attr`) and the editor
-    // virtual (without arguments) is non-obvious. Find a better
-    // syntax to differentiate between a getter-only definition (as here)
-    // and a model-evaluation definition (as below)
-    //
-    // It may be a good idea to alias 'virtual' with different signatures
-    // eg, switchVM.compute() would take a single get()
-    // switchVM.pass() would take a model-evaluator fn() or a model instance
-    // switchVM.virtual() would take the full object
-    switchVM.virtual('activeUser', function get(attr) {
+    switchVM.compute('activeUser', function() {
       var model = this.get('model');
       var index = this.get('userIndex');
       return model[index];
@@ -112,15 +100,28 @@
     switchVM.bindView('data-switch');
 
     // Editor - edits the active user model
-    var editorVM = new Backbone.ViewModel();
-    editorVM.virtual('first', 'last', function model() {
+    var editorVM = new Backbone.ViewModel({
+      feedback: undefined
+    });
+    editorVM.pass('first', 'last', function() {
       return switchVM.get('activeUser');
     });
+    editorVM.virtual('zip', {
+      get: function() {
+        return switchVM.get('activeUser').get('zip');
+      },
+      set: function(val) {  // TODO: signature needs to be (val, options, attr, virtual)
+        if (isNumeric(val)) {
+          return switchVM.get('activeUser').set('zip', val);
+        }
+        this.set('feedback', 'Please enter a numeric zipcode, eg: 28202');
+      }
+    })
     editorVM.bindView('data-editor');
 
     // Profile - displays transformed data from the active user model
     var profileVM = new Backbone.ViewModel();
-    profileVM.virtual('fullname', function(attr) {
+    profileVM.compute('fullname', function() {
       return switchVM.get('activeUser').get('first') + ' ' + switchVM.get('activeUser').get('last');
     });
     profileVM.bindView('data-profile');
