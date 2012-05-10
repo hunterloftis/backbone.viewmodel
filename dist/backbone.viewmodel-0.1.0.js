@@ -3,8 +3,23 @@
   Backbone.ViewModel = Backbone.Model.extend({
 
     initialize: function(attributes, options) {
+      this._virtuals = {};
       this._bindings = [];
-      this._computes = {};
+    },
+
+    // TODO: This probably gets called twice whenever a virtual value is manually set()
+    // Once for when the property is initially set, then when the property triggers its referenced model to change
+    // the model change will trigger this set() again. Try to eliminate this inefficiency.
+    set: function(key, value, options) {
+      var virtual;
+      // Call virtual's set() unless this was triggered by a dependency change
+      if (!(options && options.dependency)) {
+        virtual = this._virtuals && this._virtuals.hasOwnProperty(key) && this._virtuals[key];
+        if (virtual) {
+          return virtual.set.call(this, key, value, options, virtual);
+        }
+      }
+      return Backbone.Model.prototype.set.apply(this, arguments);
     },
 
     bindView: function(attribute, container) {
@@ -71,21 +86,161 @@
 
     // Get the value of an attribute.
     get: function(attr) {
-      Backbone.Computed.track(this, 'change:' + attr);
+      Backbone.Virtual.track(this, 'change:' + attr);
       return this.attributes[attr];
     },
 
-    compute: function(attr, fn) {
-      var newComputed = new Backbone.Computed(attr, fn, this);
-      this._computes[attr] = newComputed;
-      newComputed.on('change', this.onCompute, this);
-      newComputed.run();
+    compute: function() {
+      var args = _.toArray(arguments);
+      var get = args.pop();
+      args.push({ get: get });
+      this.virtual.apply(this, args);
     },
 
-    onCompute: function(compute) {
-      this.set(compute.attr, compute.result);
+    pass: function() {
+      var args = _.toArray(arguments);
+      var reference = args.pop();
+      args.push({ reference: reference });
+      this.virtual.apply(this, args);
+    },
+
+    virtual: function() {
+      var attrs = _.toArray(arguments);
+      var options = attrs.pop();
+      options.model = this;
+      return _.map(attrs, this.createVirtual(options), this);
+    },
+
+    createVirtual: function(options) {
+      var self = this;
+      return function(attr) {
+        var opts = _.extend({}, options, { attr: attr });
+        var newVirtual = new Backbone.Virtual(opts);
+        self._virtuals[attr] = newVirtual;
+        newVirtual.on('change', self.onVirtual, self);
+        newVirtual.run();
+      };
+    },
+
+    onVirtual: function(virtual) {
+      this.set(virtual.attr, virtual.result, { dependency: true });
     }
 
+  });
+
+})(Backbone);(function(Backbone) {
+
+  // Add tracking to Backbone.Model
+  Backbone.Model.prototype.get = function(attr) {
+    Backbone.Virtual.track(this, 'change:' + attr);
+    return this.attributes[attr];
+  };
+
+  // Add tracking to Backbone.Collection
+  function extendCollection(name) {
+    Backbone.Collection.prototype['_' + name] = Backbone.Collection.prototype[name];
+    Backbone.Collection.prototype[name] = function() {
+      // Trigger an update on any write operation...
+      Backbone.Virtual.track(this, 'add remove reset change create sort');
+      return this['_' + name].apply(this, arguments);
+    };
+  }
+  // ...if a Virtual function performs a Collection read operation:
+  _.each(['get', 'getByCid', 'where', 'pluck', 'clone', 'at', 'toJSON'], extendCollection);
+
+
+  // Options = model, attr, get, set, fail
+  Backbone.Virtual = function(options) {
+    _.extend(this, options);
+    this.dependencies = [];
+    this.result = undefined;
+  };
+
+  _.extend(Backbone.Virtual.prototype, Backbone.Events, {
+
+    run: function() {
+      Backbone.Virtual.startTracking();
+      if (this.hasOwnProperty('fail')) {
+        try {
+          this.result = this.get.call(this.model, this.attr, this);
+        }
+        catch (e) {
+          this.result = this.fail;
+        }
+      }
+      else {
+        this.result = this.get.call(this.model, this.attr, this);
+      }
+      this.update(Backbone.Virtual.stopTracking());
+      this.trigger('change', this);
+      return this.result;
+    },
+
+    onChange: function() {
+      this.run();
+    },
+
+    update: function(newDependencies) {
+      _.each(this.dependencies, this.remove, this);
+      _.each(newDependencies, this.add, this);
+      this.dependencies = newDependencies;
+    },
+
+    remove: function(dependency) {
+      dependency.model.off(dependency.event, this.onChange, this);
+    },
+
+    add: function(dependency) {
+      dependency.model.on(dependency.event, this.onChange, this);
+    },
+
+    // Default virtual .get()
+    // TODO: remove the typeof checks in the getters/setters
+    get: function(attr, virtual) {
+      var model = (typeof virtual.reference === 'function') ?
+        virtual.reference.call(this) : virtual.reference;
+      return model.get(attr);
+    },
+
+    // Default virtual .set()
+    // TODO: remove the typeof checks in the getters/setters
+    set: function(attr, val, options, virtual) {
+      var model = (typeof virtual.reference === 'function') ?
+        virtual.reference.call(this) : virtual.reference;
+      return model.set(attr, val);
+    }
+
+  });
+
+  _.extend(Backbone.Virtual, {
+    _computations: [],
+    _dependencies: undefined,
+
+    startTracking: function() {
+      // Create a new array for tracking dependencies of this compute function
+      Backbone.Virtual._dependencies = [];
+      // Push the new tracking array onto the stack of computations
+      Backbone.Virtual._computations.push(Backbone.Virtual._dependencies);
+    },
+
+    stopTracking: function() {
+      // Pop the tracking array off of the stack
+      var dependencies = Backbone.Virtual._computations.pop();
+      // Point the tracking array to the next item on the stack
+      Backbone.Virtual._dependencies = Backbone.Virtual._computations.length ?
+        Backbone.Virtual._computations(Backbone.Virtual._computations.length - 1) :
+        undefined;
+      return dependencies;
+    },
+
+    track: function(model, event) {
+      if (Backbone.Virtual._dependencies) {
+        Backbone.Virtual._dependencies.push({
+          model: model,
+          event: event
+        });
+      }
+    }
   });
 
 })(Backbone);(function(Backbone) {
@@ -112,114 +267,6 @@
   });
 
   Backbone.Binding.extend = Backbone.Model.extend;
-
-})(Backbone);(function(Backbone) {
-
-  // Add tracking to Backbone.Model
-  Backbone.Model.prototype.get = function(attr) {
-    Backbone.Computed.track(this, 'change:' + attr);
-    return this.attributes[attr];
-  };
-
-  // Add tracking to Backbone.Collection
-  function extendCollection(name) {
-    Backbone.Collection.prototype['_' + name] = Backbone.Collection.prototype[name];
-    Backbone.Collection.prototype[name] = function() {
-      // Trigger an update on any write operation...
-      Backbone.Computed.track(this, 'add remove reset change create sort');
-      return this['_' + name].apply(this, arguments);
-    };
-  }
-  // ...if a Computed function performs a Collection read operation:
-  _.each(['get', 'getByCid', 'where', 'pluck', 'clone', 'at', 'toJSON'], extendCollection);
-
-
-  Backbone.Computed = function(attr, fn, context) {
-    this.attr = attr;
-    if (typeof(fn) === 'function') {
-      this.get = fn;
-      this.safe = false;
-    }
-    else {
-      // extend with: get, safe
-      _.extend(this, fn);
-      this.safe = fn.hasOwnProperty('fail');
-    }
-    this.context = context;
-    this.dependencies = [];
-    this.result = undefined;
-  };
-
-  _.extend(Backbone.Computed.prototype, Backbone.Events, {
-
-    run: function() {
-      Backbone.Computed.startTracking();
-      if (this.safe) {
-        try {
-          this.result = this.get.call(this.context);
-        }
-        catch (e) {
-          this.result = this.fail;
-        }
-      }
-      else {
-        this.result = this.get.call(this.context);
-      }
-      this.update(Backbone.Computed.stopTracking());
-      this.trigger('change', this);
-      return this.result;
-    },
-
-    onChange: function() {
-      this.run();
-    },
-
-    update: function(newDependencies) {
-      _.each(this.dependencies, this.remove, this);
-      _.each(newDependencies, this.add, this);
-      this.dependencies = newDependencies;
-    },
-
-    remove: function(dependency) {
-      dependency.model.off(dependency.event, this.onChange, this);
-    },
-
-    add: function(dependency) {
-      dependency.model.on(dependency.event, this.onChange, this);
-    }
-
-  });
-
-  _.extend(Backbone.Computed, {
-    _computations: [],
-    _dependencies: undefined,
-
-    startTracking: function() {
-      // Create a new array for tracking dependencies of this compute function
-      Backbone.Computed._dependencies = [];
-      // Push the new tracking array onto the stack of computations
-      Backbone.Computed._computations.push(Backbone.Computed._dependencies);
-    },
-
-    stopTracking: function() {
-      // Pop the tracking array off of the stack
-      var dependencies = Backbone.Computed._computations.pop();
-      // Point the tracking array to the next item on the stack
-      Backbone.Computed._dependencies = Backbone.Computed._computations.length ?
-        Backbone.Computed._computations(Backbone.Computed._computations.length - 1) :
-        undefined;
-      return dependencies;
-    },
-
-    track: function(model, event) {
-      if (Backbone.Computed._dependencies) {
-        Backbone.Computed._dependencies.push({
-          model: model,
-          event: event
-        });
-      }
-    }
-  });
 
 })(Backbone);(function(Backbone) {
 
@@ -259,6 +306,20 @@
     stop: function() {
       Backbone.Binding.prototype.stop.apply(this, arguments);
       $(this.node).off('keyup change', this.onViewChange);
+    }
+  });
+
+  // Click Binding
+  var ClickBinding = Backbone.Binding['click'] = Backbone.Binding.extend({
+    start: function() {
+      $(this.node).on('click', this.onViewChange);
+    },
+    onViewChange: function(event) {
+      event.preventDefault();
+      this.viewModel.get(this.attribute).call(this.viewModel);
+    },
+    stop: function() {
+      $(this.node).off('click', this.onViewChange);
     }
   });
 

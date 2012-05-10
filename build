@@ -7,7 +7,7 @@ OUT=dist/backbone.viewmodel-$VERSION.min.js
 echo "Development: $IN"
 echo "Production: $OUT"
 
-cat backbone.viewmodel.js backbone.binding.js backbone.computed.js lib/bindings.js > $IN
+cat backbone.viewmodel.js backbone.virtual.js backbone.binding.js lib/bindings.js > $IN
 
 curl -s \
         -d compilation_level=SIMPLE_OPTIMIZATIONS \
