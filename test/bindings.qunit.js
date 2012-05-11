@@ -72,4 +72,34 @@ $(document).ready(function() {
     strictEqual(vm.get('name'), 'typing', 'Model is "typing" after View gets input');
   });
 
+  test("'css' binding", function() {
+    var vm = new Backbone.ViewModel({
+      isRed: false,
+      isGreen: 0,
+      isBlue: undefined,
+      isTransparent: true
+    });
+
+    vm.compute('isWhite', function() {
+      return this.get('isRed') && this.get('isGreen') && this.get('isBlue');
+    });
+
+    strictEqual($('#testCss').attr('class'), 'existing', 'Existing class should be present before binding');
+
+    vm.bindView('data-test-css');
+    strictEqual($('#testCss').attr('class'), 'existing transparent', 'Transparent should be appended to existing class');
+
+    vm.set('isRed', true);
+    strictEqual($('#testCss').attr('class'), 'existing transparent red', 'Red class should be appended after set');
+
+    vm.set('isTransparent', false);
+    strictEqual($('#testCss').attr('class'), 'existing red', 'Transparent class should be removed after set');
+
+    vm.set('isBlue', 'astring');
+    strictEqual($('#testCss').attr('class'), 'existing red blue', 'Blue class should be added with "astring"');
+
+    vm.set('isGreen', true);
+    strictEqual($('#testCss').attr('class'), 'existing red blue green white', 'Green class should automatically add white class');
+  });
+
 });

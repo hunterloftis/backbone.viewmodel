@@ -2,11 +2,15 @@
 <html>
 <head>
   <title>Backbone.ViewModel Virtuals Example</title>
+  <link rel='stylesheet' href='virtuals.css' type='text/css' media='screen' />
 </head>
 <body>
 
   <!-- Bound View -->
   <div data-style='css(dark, isDark); css(big, isBig)'>
+    <a href='#' data-style='click(setDark, true)'>Dark</a>
+    <a href='#' data-style='click(setDark, false)'>Light</a>
+
     <a href='#' data-switch='click(setUser, 0)'>First user</a>
     <a href='#' data-switch='click(setUser, 1)'>Second user</a>
 
@@ -43,7 +47,22 @@
       })
     ];
 
-    // Switch - manages which user model is active
+    // Style
+    // manages style (css binding)
+
+    var styleVM = new Backbone.ViewModel({
+      isDark: false,
+      setDark: function(val) {
+        this.set('isDark', val);
+        console.log("isDark:", this.get('isDark'));
+      }
+    });
+
+    styleVM.bindView('data-style');
+
+    // Switch
+    // manages which user model is active
+
     var switchVM = new Backbone.ViewModel({
       model: users,
       userIndex: 0,
@@ -51,20 +70,26 @@
         this.set('userIndex', index);
       }
     });
+
     switchVM.compute('activeUser', function() {
       var model = this.get('model');
       var index = this.get('userIndex');
       return model[index];
     });
+
     switchVM.bindView('data-switch');
 
-    // Editor - edits the active user model
+    // Editor
+    // edits the active user model
+
     var editorVM = new Backbone.ViewModel({
       feedback: undefined
     });
+
     editorVM.pass('first', 'last', function() {
       return switchVM.get('activeUser');
     });
+
     editorVM.virtual('zip', {
       get: function() {
         return switchVM.get('activeUser').get('zip');
@@ -78,11 +103,15 @@
     })
     editorVM.bindView('data-editor');
 
-    // Profile - displays transformed data from the active user model
+    // Profile
+    // displays transformed data from the active user model
+
     var profileVM = new Backbone.ViewModel();
+
     profileVM.compute('fullname', function() {
       return switchVM.get('activeUser').get('first') + ' ' + switchVM.get('activeUser').get('last');
     });
+
     profileVM.bindView('data-profile');
 
   </script>
