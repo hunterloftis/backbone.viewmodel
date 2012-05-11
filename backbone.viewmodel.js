@@ -82,7 +82,7 @@
         'true': true,
         'false': false
       };
-      if (map[arg]) {
+      if (map.hasOwnProperty(arg)) {
         arg = map[arg];
       }
       else if (arg.charAt[0] === '"' || arg.charAt[0] === "'") {

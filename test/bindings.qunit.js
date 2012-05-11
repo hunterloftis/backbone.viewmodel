@@ -100,6 +100,11 @@ $(document).ready(function() {
 
     vm.set('isGreen', true);
     strictEqual($('#testCss').attr('class'), 'existing red blue green white', 'Green class should automatically add white class');
+
+    strictEqual($('#testInvertedCss').attr('class'), '', 'Inverted CSS should be classless');
+
+    vm.set('isRed', null);
+    strictEqual($('#testInvertedCss').attr('class'), 'red', 'Inverted CSS should become red when isRed is falsy');
   });
 
 });

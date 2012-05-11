@@ -24,7 +24,9 @@
   <script src="model.regression.js"></script>
   <script src="viewmodel.regression.js"></script>
   <script src="collection.regression.js"></script>
+  <script src='internals.qunit.js'></script>
   <script src='bindings.qunit.js'></script>
+  <script src='each.qunit.js'></script>
   <script src='virtual.qunit.js'></script>
   <script src='integration.qunit.js'></script>
 
@@ -46,6 +48,13 @@
     <p id='testText' data-test-text='text(name)'>unset</p>
     <input id='testVal' data-test-val='val(name)' value='unset' />
     <div id='testCss' class='existing' data-test-css='css(red, isRed); css(green, isGreen); css(blue, isBlue); css(transparent, isTransparent); css(white, isWhite)'></div>
+    <div id='testInvertedCss' data-test-css='css(red, isRed, false)'></div>
+  </div>
+
+  <div id='eachBinding'>
+    <ul id='simpleEach' data-each-simple='each(listItems)'>
+      <li data-each-simple='text(label)'></li>
+    </ul>
   </div>
 
   <div id='integrationTests'>

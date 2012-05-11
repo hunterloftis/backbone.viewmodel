@@ -7,9 +7,10 @@
 <body>
 
   <!-- Bound View -->
-  <div data-style='css(dark, isDark); css(big, isBig)'>
-    <a href='#' data-style='click(setDark, true)'>Dark</a>
-    <a href='#' data-style='click(setDark, false)'>Light</a>
+  <a class='tab' href='#' data-style='click(setDark, true); css(active, isDark)'>First</a>
+  <a class='tab' href='#' data-style='click(setDark, false); css(active, isDark, false)'>Second</a>
+
+  <form data-style='css(dark, isDark); css(big, isBig)'>
 
     <a href='#' data-switch='click(setUser, 0)'>First user</a>
     <a href='#' data-switch='click(setUser, 1)'>Second user</a>
@@ -18,7 +19,7 @@
     <input data-editor='val(last)' placeholder='last'></div>
 
     <p data-profile='text(fullname)'></p>
-  </div>
+  </form>
 
   <!-- Platform dependencies -->
   <script src='../vendor/zepto-1.0rc1.js'></script>
@@ -54,7 +55,6 @@
       isDark: false,
       setDark: function(val) {
         this.set('isDark', val);
-        console.log("isDark:", this.get('isDark'));
       }
     });
 
