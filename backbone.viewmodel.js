@@ -24,9 +24,13 @@
 
     bindView: function(attribute, container) {
       container = container || 'body';
-      var nodes = $(container).find('*[' + attribute + ']');
-
+      var selector = '*[' + attribute + ']';
+      var nodes = $(container).find(selector);
+      if ($(container).is(selector)) {
+        nodes = $(container).add(nodes);
+      }
       _.each(nodes, this.bindToNode(attribute));
+      return nodes;
     },
 
     unbindView: function() {
