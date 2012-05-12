@@ -57,13 +57,13 @@
 
         var bindingString = $(node).attr(attribute);
         var bindingList = bindingString.split(';');
-        var descriptions = _.map(bindingList, self.parseBinding(node));
+        var descriptions = _.map(bindingList, self.parseBinding(node, attribute));
 
         _.each(descriptions, self.createBinding, self);
       };
     },
 
-    parseBinding: function(node) {
+    parseBinding: function(node, attribute) {
       var self = this;
       return function(bindingPair) {
         var typeSplit = bindingPair.split('(');
@@ -71,13 +71,15 @@
         var argString = typeSplit[1].trim().slice(0, -1);
         var args = argString.split(',');
         args = _.map(args, self.parseArgument);
-        // TODO: identify special data types here --
-        // undefined, null, Numbers, Strings, true/false
+        // example:
+        // <div id='foo' data-bind='visible(bar)'></div>
+        // vm.bindView('#foobar');
         return {
-          node: node,
-          viewModel: self,
-          type: type,
-          args: args
+          node: node,               // <div id='foo' ... >
+          viewModel: self,          // vm
+          type: type,               // "visible"
+          bindingAttr: attribute,   // "data-bind"
+          args: args                // ["bar"]
         };
       };
     },
