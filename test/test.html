@@ -56,6 +56,12 @@
     <ul id='simpleEach' data-each-simple='each(listItems)'>
       <li data-each-simple='text(label)'>default content</li>
     </ul>
+    <div id='fragEach' data-each-frag='each(items)'>
+      <h1 data-each-frag='text(name)'></h1>
+      <p data-each-frag='css(female, isFemale); text(description)'></p>
+      <a href='#' data-each-frag='attr(href, mailLink'>Email</a>
+      <a href='#' data-each-frag='click(removeMe)'>Remove</a>
+    </div>
   </div>
 
   <div id='integrationTests'>
