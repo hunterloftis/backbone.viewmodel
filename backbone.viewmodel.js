@@ -4,9 +4,10 @@
 
   Backbone.ViewModel = Backbone.Model.extend({
 
-    initialize: function(attributes, options) {
+    constructor: function(attributes, options) {
       this._virtuals = {};
       this._bindings = [];
+      proto.constructor.apply(this, arguments);
     },
 
     // TODO: This probably gets called twice whenever a virtual value is manually set()
@@ -31,6 +32,7 @@
       if ($(container).is(selector)) {
         nodes = $(container).add(nodes);
       }
+      console.log("bindView THIS:", this);
       _.each(nodes, this.bindToNode(attribute));
       return nodes;
     },
@@ -105,9 +107,14 @@
       if (Binding) {
         var binding = new Binding(description);
         if (binding) {
-          binding.start();
-          this._bindings.push(binding);
-          return binding;
+          try {
+            binding.start();
+            this._bindings.push(binding);
+            return binding;
+          }
+          catch(e) {
+            console.log("THIS on fail:", this);
+          }
         }
         throw new Error("Unable to create '" + description.type + "' binding");
       }
@@ -158,7 +165,7 @@
 
   });
 
-  Backbone.Model.prototype = Backbone.ViewModel.prototype;
+  Backbone.Model = Backbone.ViewModel;
 
 
 })(Backbone);

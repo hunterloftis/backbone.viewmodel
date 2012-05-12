@@ -4,7 +4,7 @@ $(document).ready(function() {
 
   test("basic rendering", function() {
 
-    var vm = new Backbone.ViewModel({
+    var vm = new Backbone.Model({
       listItems: new Backbone.Collection([
         { label: 'a' },
         { label: 'b' },

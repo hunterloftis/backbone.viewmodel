@@ -7,6 +7,9 @@
     // TODO: ViewCollection methods
   });
 
+  // Use the external, monkeypatched version of Backbone.Model
+  Backbone.Collection.prototype.model = Backbone.Model;
+
   // Add tracking to Backbone.Collection
   function extendCollection(name) {
     Backbone.ViewCollection.prototype[name] = function() {
@@ -19,6 +22,6 @@
   _.each(['get', 'getByCid', 'where', 'pluck', 'clone', 'at', 'toJSON'], extendCollection);
 
   // Alias back to Collection
-  Backbone.Collection.prototype = Backbone.ViewCollection.prototype;
+  Backbone.Collection = Backbone.ViewCollection;
 
 })(Backbone);

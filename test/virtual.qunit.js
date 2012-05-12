@@ -62,7 +62,7 @@ test("filtering a model", function() {
     ])
   });
 
-  var vm = new Backbone.ViewModel({
+  var vm = new Backbone.Model({
     model: model,
     limit: 2
   });
