@@ -1,5 +1,6 @@
 (function(Backbone) {
 
+  // Store reference to old methods
   var proto = Backbone.Model.prototype;
 
   Backbone.ViewModel = Backbone.Model.extend({
@@ -32,7 +33,6 @@
       if ($(container).is(selector)) {
         nodes = $(container).add(nodes);
       }
-      console.log("bindView THIS:", this);
       _.each(nodes, this.bindToNode(attribute));
       return nodes;
     },
@@ -165,7 +165,7 @@
 
   });
 
+  // Alias ViewModel to Model
   Backbone.Model = Backbone.ViewModel;
-
 
 })(Backbone);
