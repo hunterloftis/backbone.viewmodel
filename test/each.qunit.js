@@ -6,10 +6,10 @@ $(document).ready(function() {
 
     var vm = new Backbone.ViewModel({
       listItems: new Backbone.Collection([
-        new Backbone.ViewModel({ label: 'a' }),
-        new Backbone.ViewModel({ label: 'b' }),
-        new Backbone.ViewModel({ label: 'c' }),
-        new Backbone.ViewModel({ label: 'd' })
+        { label: 'a' },
+        { label: 'b' },
+        { label: 'c' },
+        { label: 'd' }
       ])
     });
 

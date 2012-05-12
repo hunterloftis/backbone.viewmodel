@@ -1,24 +1,5 @@
 (function(Backbone) {
 
-  // Add tracking to Backbone.Model
-  Backbone.Model.prototype.get = function(attr) {
-    Backbone.Virtual.track(this, 'change:' + attr);
-    return this.attributes[attr];
-  };
-
-  // Add tracking to Backbone.Collection
-  function extendCollection(name) {
-    Backbone.Collection.prototype['_' + name] = Backbone.Collection.prototype[name];
-    Backbone.Collection.prototype[name] = function() {
-      // Trigger an update on any write operation...
-      Backbone.Virtual.track(this, 'add remove reset change create sort');
-      return this['_' + name].apply(this, arguments);
-    };
-  }
-  // ...if a Virtual function performs a Collection read operation:
-  _.each(['get', 'getByCid', 'where', 'pluck', 'clone', 'at', 'toJSON'], extendCollection);
-
-
   // Options = model, attr, get, set, fail
   Backbone.Virtual = function(options) {
     _.extend(this, options);

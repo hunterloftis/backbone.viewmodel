@@ -1,5 +1,7 @@
 (function(Backbone) {
 
+  var proto = Backbone.Model.prototype;
+
   Backbone.ViewModel = Backbone.Model.extend({
 
     initialize: function(attributes, options) {
@@ -19,7 +21,7 @@
           return virtual.set.call(this, key, value, options, virtual);
         }
       }
-      return Backbone.Model.prototype.set.apply(this, arguments);
+      return proto.set.apply(this, arguments);
     },
 
     bindView: function(attribute, container) {
@@ -155,5 +157,8 @@
     }
 
   });
+
+  Backbone.Model.prototype = Backbone.ViewModel.prototype;
+
 
 })(Backbone);
