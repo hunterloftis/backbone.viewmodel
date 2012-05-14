@@ -10,6 +10,7 @@
 
   <!-- Backbone.ViewModel -->
   <script src='../backbone.viewmodel.js'></script>
+  <script src='../backbone.viewcollection.js'></script>
   <script src='../backbone.virtual.js'></script>
   <script src='../backbone.binding.js'></script>
   <script src='../lib/bindings.js'></script>
@@ -26,55 +27,85 @@
   <ul data-list='each(todos)'>
     <li data-list='css(done, isDone)'>
       <input type='checkbox' data-list='val(isDone)'/>
-      <p data-list='text(task); click(edit)'></p>
+      <p data-list='text(task); click(edit)' placeholder='new todo'></p>
     </li>
   </ul>
+  <a href='#' data-list='click(createTodo)'>New todo</a>
 
   <script>
 
     // MODEL Layer
 
-    var Todo = Backbone.Model.extend({
+    var TodoModel = Backbone.Model.extend({
       defaults: {
-        task: '',
+        description: '',
         done: false
       }
     });
 
-    var list = new Backbone.Collection({
-      model: Todo
+    var todoList = new Backbone.Collection({
+      model: TodoModel
     });
-
 
     // VIEW-MODEL Layer
 
-    var filters = {
-      all: function(todo) {
+    // View model representing the interactive list items
+    var TodoVM = Backbone.ViewModel.extend({
+      edit: function() {
+        alert('editing');
+      },
+      initialize: function() {
+        this.pass('description', 'done', function() {
+          return this.get('model');
+        });
+      }
+    }, {
+      createFromModel: function(todoModel) {
+        return new TodoVM({ model: todoModel });
+      }
+    })
+
+    // View model representing the interactive list
+    var listVM = new Backbone.ViewModel({
+      collection: todoList,
+      filter: 'all'
+    });
+
+    listVM.setFilter = function(name) {
+      this.set('filter', name);
+    };
+
+    listVM.createTodo = function() {
+      console.log("Creating a TODO");
+      this.get('collection').add(new TodoModel());
+    }
+
+    listVM.filters = {
+      all: function(item) {
         return true;
       },
-      remaining: function(todo) {
-        return !todo.get('done');
+      remaining: function(item) {
+        return !item.get('done');
       },
-      complete: function(todo) {
-        return todo.get('done');
+      complete: function(item) {
+        return item.get('done');
       }
     };
 
-    var listVM = new Backbone.ViewModel({
-      list: list,
-      filter: 'all',
-      setFilter: function(name) {
-        this.set('filter', name);
-      }
-    });
-
+    // Compute that converts todo models into filtered todo viewmodels
     listVM.compute('todos', function() {
-      var list = this.get('list');
+      var list = this.get('collection');
       var filterKey = this.get('filter');
-      return _.filter(list, filters[filterKey]);
+      var filterFn = this.filters[filterKey];
+      var filteredList = list.filter(filterFn);
+      return filteredList.map(TodoVM.createFromModel);
     });
 
-    simpleVM.bindView('data-list');
+    listVM.on('change:todos', function() {
+      console.log("Updated TODOS collection");
+    })
+
+    listVM.bindView('data-list');
 
   </script>
 

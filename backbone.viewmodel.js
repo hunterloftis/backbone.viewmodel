@@ -109,14 +109,9 @@
       if (Binding) {
         var binding = new Binding(description);
         if (binding) {
-          try {
-            binding.start();
-            this._bindings.push(binding);
-            return binding;
-          }
-          catch(e) {
-            console.log("THIS on fail:", this);
-          }
+          binding.start();
+          this._bindings.push(binding);
+          return binding;
         }
         throw new Error("Unable to create '" + description.type + "' binding");
       }

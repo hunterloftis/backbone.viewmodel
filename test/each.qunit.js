@@ -55,8 +55,32 @@ $(document).ready(function() {
     strictEqual($(children[0]).text(), 'f', 'first LI should be "f"');
   });
 
-  test("rendering fragments", function() {
+  test("rendering fragments and extended models", function() {
     expect(0);
+    return;
+
+    var Person = Backbone.Model.extend({
+      defaults: {
+        name: 'name default',
+        gender: 'female',
+        email: ''
+      }
+    });
+
+    var people = new Backbone.Collection();
+
+    people.push(new Person({
+      name: 'Hunter',
+      gender: 'male',
+      email: 'hunter@hunterloftis.com'
+    }));
+
+    var peopleVM = new Backbone.ViewModel({
+      people: people
+    });
+
+
+
   });
 
   test("rendering the DOM efficiently", function() {

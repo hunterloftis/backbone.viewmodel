@@ -7,6 +7,9 @@
     this.result = undefined;
   };
 
+  Backbone.Virtual._dependencies = [];
+  Backbone.Virtual._computations = [];
+
   _.extend(Backbone.Virtual.prototype, Backbone.Events, {
 
     run: function() {
@@ -79,7 +82,7 @@
       var dependencies = Backbone.Virtual._computations.pop();
       // Point the tracking array to the next item on the stack
       Backbone.Virtual._dependencies = Backbone.Virtual._computations.length ?
-        Backbone.Virtual._computations(Backbone.Virtual._computations.length - 1) :
+        Backbone.Virtual._computations[Backbone.Virtual._computations.length - 1] :
         undefined;
       return dependencies;
     },
