@@ -27,7 +27,7 @@
   <ul data-list='each(todos)'>
     <li data-list='css(done, isDone)'>
       <input type='checkbox' data-list='val(isDone)'/>
-      <p data-list='text(task); click(edit)' placeholder='new todo'></p>
+      <p data-list='text(description); click(edit)' placeholder='new todo'></p>
     </li>
   </ul>
   <a href='#' data-list='click(createTodo)'>New todo</a>
@@ -38,14 +38,16 @@
 
     var TodoModel = Backbone.Model.extend({
       defaults: {
-        description: '',
+        description: 'default',
         done: false
       }
     });
 
-    var todoList = new Backbone.Collection({
+    var TodoCollection = Backbone.Collection.extend({
       model: TodoModel
     });
+
+    var todoList = new TodoCollection();
 
     // VIEW-MODEL Layer
 
@@ -95,15 +97,14 @@
     // Compute that converts todo models into filtered todo viewmodels
     listVM.compute('todos', function() {
       var list = this.get('collection');
+      console.log("list:", list.models.length);
       var filterKey = this.get('filter');
       var filterFn = this.filters[filterKey];
       var filteredList = list.filter(filterFn);
-      return filteredList.map(TodoVM.createFromModel);
+      var ret = filteredList.map(TodoVM.createFromModel);
+      console.log("computed:", ret);
+      return ret;
     });
-
-    listVM.on('change:todos', function() {
-      console.log("Updated TODOS collection");
-    })
 
     listVM.bindView('data-list');
 
