@@ -107,4 +107,38 @@ $(document).ready(function() {
     strictEqual($('#testInvertedCss').attr('class'), 'red', 'Inverted CSS should become red when isRed is falsy');
   });
 
+  test("'click' binding", function() {
+
+    var a = new Backbone.ViewModel({
+      clicks: 0
+    });
+    a.clicked = function() {
+      this.set('clicks', this.get('clicks') + 1);
+    };
+
+    var b = new Backbone.ViewModel({
+      clicks: 0,
+      clicked: function() {
+        this.set('clicks', this.get('clicks') + 1);
+      }
+    });
+
+    a.bindView('data-click-a');
+    b.bindView('data-click-b');
+    strictEqual(a.get('clicks'), 0, 'a should start with zero clicks');
+    strictEqual(b.get('clicks'), 0, 'b should start with zero clicks');
+
+    $('#testClickA').trigger('click');
+    strictEqual(a.get('clicks'), 1, 'a should have one click after trigger');
+    strictEqual(b.get('clicks'), 0, 'b should still have zero clicks');
+
+    $('#testClickB').trigger('click');
+    strictEqual(a.get('clicks'), 1, 'a should still have one click');
+    strictEqual(b.get('clicks'), 1, 'b should have one click after trigger');
+
+    $('#testClickAB').trigger('click');
+    strictEqual(a.get('clicks'), 2, 'a should have two clicks after AB trigger');
+    strictEqual(b.get('clicks'), 2, 'b should have two clicks after AB trigger');
+  });
+
 });
