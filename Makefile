@@ -16,15 +16,15 @@ dist: js
     http://closure-compiler.appspot.com/compile \
     > $(OUT)
 
-clean:
-	rm -rf dist/*
-	rm -rf lib/*
-
 test: js
 	open test/test.html
 
-js:
+js: clean
 	coffee --output lib --compile .
 	cp *.js lib
+
+clean:
+	rm -rf dist/*
+	rm -rf lib/*
 
 .PHONY: dist clean test js
