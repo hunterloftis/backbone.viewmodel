@@ -17,10 +17,8 @@ dist: js
     > $(OUT)
 
 clean:
-	touch dist/deleteme
-	touch lib/deleteme
-	rm dist/*
-	rm lib/*
+	rm -rf dist/*
+	rm -rf lib/*
 
 test: js
 	open test/test.html
