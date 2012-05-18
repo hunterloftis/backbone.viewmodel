@@ -1,12 +1,15 @@
-VERSION=0.1.0
+VERSION=0.2.0
 IN=dist/backbone.viewmodel-$(VERSION).js
 OUT=dist/backbone.viewmodel-$(VERSION).min.js
+
+full: dist
+	open test/test_prod.html
 
 dist: js
 	echo "Development: $(IN)"
 	echo "Production: $(OUT)"
 
-	cat backbone.viewmodel.js backbone.virtual.js backbone.binding.js lib/bindings.js > $(IN)
+	cat lib/backbone.viewmodel.js lib/backbone.viewcollection.js lib/backbone.virtual.js lib/backbone.binding.js lib/bindings.js > $(IN)
 
 	curl -s \
     -d compilation_level=SIMPLE_OPTIMIZATIONS \
