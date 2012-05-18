@@ -21,7 +21,6 @@ test: js
 
 js: clean
 	coffee --output lib --compile .
-	cp *.js lib
 
 clean:
 	rm -rf dist/*
