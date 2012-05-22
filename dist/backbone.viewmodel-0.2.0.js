@@ -621,9 +621,9 @@
         this.container.html('');
         this.collection = this.viewModel.get(this.attr);
         if (this.collection instanceof Backbone.Collection) {
-          this.collection.off('add remove reset change create sort', this.onCollectionChange);
+          this.collection.off('add remove reset create sort', this.onCollectionChange);
           this.collection.each(this.renderItem);
-          return this.collection.on('add remove reset change create sort', this.onCollectionChange);
+          return this.collection.on('add remove reset create sort', this.onCollectionChange);
         } else {
           _ref = this.collection;
           _results = [];
