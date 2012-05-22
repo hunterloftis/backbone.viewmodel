@@ -63,9 +63,9 @@ do (Backbone) ->
       @container.html('')
       @collection = @viewModel.get(@attr)
       if @collection instanceof Backbone.Collection
-        @collection.off('add remove reset change create sort', @onCollectionChange);
+        @collection.off('add remove reset create sort', @onCollectionChange);
         @collection.each(@renderItem);
-        @collection.on('add remove reset change create sort', @onCollectionChange);
+        @collection.on('add remove reset create sort', @onCollectionChange);
       else
         @renderItem(item) for item in @collection
     renderItem: (viewModel) =>
