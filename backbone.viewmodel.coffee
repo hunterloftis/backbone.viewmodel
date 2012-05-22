@@ -14,6 +14,7 @@ do (Backbone) ->
       @_virtuals = {}
       @_bindings = []
       super
+      @compute(attr, fn) for attr, fn of @computes
 
     set: (key, value, options) ->
       unless options && options.dependency
@@ -79,19 +80,19 @@ do (Backbone) ->
       Backbone.Virtual.track(this, 'change:' + attr)
       return @attributes[attr]
 
-    compute: ->
+    compute: =>
       args = _.toArray(arguments)
       get = args.pop()
       args.push({ get: get })
       @virtual.apply(this, args)
 
-    pass: ->
+    pass: =>
       args = _.toArray(arguments)
       reference = args.pop()
       args.push({ reference: reference })
       @virtual.apply(this, args)
 
-    virtual: ->
+    virtual: =>
       attrs = _.toArray(arguments)
       options = attrs.pop()
       options.model = this

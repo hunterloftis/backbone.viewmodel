@@ -246,4 +246,28 @@ test("passing with a Model", function() {
   strictEqual(Backbone.Virtual._computations.length, 0, 'computation stack should be clear');
 });
 
+test("adding virtuals with ViewModel.extend", function() {
+
+  var Extended = Backbone.ViewModel.extend({
+    defaults: {
+      x: 2
+    },
+    computes: {
+      square: function() {
+        return this.get('x') * this.get('x');
+      }
+    }
+  });
+
+  var vm = new Extended();
+
+  strictEqual(vm.get('x'), 2, 'x should be 2');
+  strictEqual(vm.get('square'), 4, 'square should be 4');
+
+  vm.set('x', 3);
+  strictEqual(vm.get('x'), 3, 'x should be 3');
+  strictEqual(vm.get('square'), 9, 'square should be 9');
+
+});
+
 });
